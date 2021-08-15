@@ -1,6 +1,6 @@
 import { lorem } from "faker";
 import { readdirSync } from "fs";
-import { CatPost } from "../pages/types/Cats";
+import { CatPost } from "../types/Cats";
 import { writeFileSync } from "fs";
 const authors = [
   "Alice",

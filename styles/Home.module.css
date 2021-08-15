@@ -21,6 +21,14 @@
   margin: 10px;
 }
 
+.searchBar {
+  margin: 2em;
+}
+
+.input {
+  width: 100%;
+}
+
 .footer {
   width: 100%;
   height: 100px;

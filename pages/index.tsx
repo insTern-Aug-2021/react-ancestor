@@ -1,18 +1,37 @@
 import Head from "next/head";
 import Image from "next/image";
 import styles from "../styles/Home.module.css";
-import { CatPost } from "./types/Cats";
+import { CatPost } from "../types/Cats";
 import { NextPage } from "next";
-import { useState } from "react";
+import { useReducer, useState } from "react";
 import CatCard from "../components/CatCard";
-import { Row, Col } from "antd";
+import { Row, Col, Input } from "antd";
+import { reducer } from "../reducer";
+import { AppState } from "../types/AppState";
+import { Select } from "antd";
+import { SearchAction } from "../types/AppAction";
 
 interface HomeProps {
   posts: CatPost[];
+  authors: string[];
 }
 
-const Home: NextPage<HomeProps> = ({ posts }) => {
-  const [selectedPosts, setSelectedPosts] = useState(posts);
+const { Option } = Select;
+
+const Home: NextPage<HomeProps> = ({ posts, authors }) => {
+  const initialState: AppState = {
+    allImages: posts,
+    matchedImage: posts,
+  };
+  const [{ matchedImage }, dispatch] = useReducer(reducer, initialState);
+
+  const [selectedAuthors, setSelectedAuthors] = useState([]);
+
+  const onSelectedAuthorsChange = (value: string[]) => {
+    dispatch(new SearchAction(value, ""));
+    setSelectedAuthors(value);
+  };
+
   return (
     <div className={styles.container}>
       <Head>
@@ -21,8 +40,27 @@ const Home: NextPage<HomeProps> = ({ posts }) => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={styles.main}>
+        <Row justify="space-around" className={styles.searchBar}>
+          <Col span={6}>
+            <Select
+              className={styles.input}
+              mode="multiple"
+              placeholder="Select your authors"
+              onChange={onSelectedAuthorsChange}
+            >
+              {authors.map((author, index) => (
+                <Option value={author} key={index}>
+                  {author}
+                </Option>
+              ))}
+            </Select>
+          </Col>
+          <Col span={14}>
+            <Input />
+          </Col>
+        </Row>
         <Row justify="center">
-          {selectedPosts.map(({ author, title, url }, index) => (
+          {matchedImage.map(({ author, title, url }, index) => (
             <Col key={index}>
               <CatCard key={index} author={author} title={title} url={url} />
             </Col>
@@ -52,7 +90,11 @@ Home.getInitialProps = async ({
 }): Promise<HomeProps> => {
   console.log(host);
   const res = await fetch(`http://${host}/api/getCats`);
-  return { posts: await res.json() };
+  const posts = (await res.json()) as CatPost[];
+  const authors = Object.keys(
+    posts.reduce((acc, { author }) => ({ ...acc, [author]: 1 }), {})
+  );
+  return { posts, authors };
 };
 
 export default Home;
