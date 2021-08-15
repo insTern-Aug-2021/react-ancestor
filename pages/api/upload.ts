@@ -8,7 +8,7 @@ export interface UploadResp {
   url: string;
 }
 
-const decomposeRegex = /(?<dir>.+\/).+\.(?<ext>[a-zA-Z0-9]*)$/;
+const decomposeRegex = /(?<dir>.+(\/|\\)).+\.(?<ext>[a-zA-Z0-9]*)$/;
 
 const UploadHandler = async (
   req: NextApiRequest,
@@ -31,7 +31,7 @@ const UploadHandler = async (
         renameSync(path, newFilePath);
 
         res.status(200).json({
-          url: newFilePath.replace("public/", ""),
+          url: newFilePath.replace("public", ""),
           filename: newFileName,
         });
         resolve();
